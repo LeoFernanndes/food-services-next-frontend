@@ -1,21 +1,23 @@
 'use client'
 
-import styles from './page.module.css'
-import {useRouter} from "next/navigation";
-import {useState} from "react";
-
-
-interface formDataInterface {
-    username: string,
-    email: string,
-    password1: string,
-    password2: string
-}
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import LocalStorageOperations from "../../../localStorage/storageOpetarations";
 
 export default function Page() {
-
-    const router = useRouter()
-    const [formData, setFormData]: formDataInterface = useState({username: '', email: '', password1: '', password2: ''})
+    const router = useRouter();
+    const [formData, setFormData] = useState({username: '', email: '', password1: '', password2: ''})
+    const localStorageOperations = new LocalStorageOperations();
+    
+    useEffect(() => {
+        async function checkIsAuthenticated(){
+            if (localStorageOperations.getIsAuthenticated()){
+                return router.push('/')
+            }
+        }
+        checkIsAuthenticated()
+    })
 
     const handleElementChange = (element: any): void => {
         const newState = {
@@ -23,7 +25,6 @@ export default function Page() {
             [element.target.name]: element.target.value
         }
         setFormData(newState)
-        console.log(newState)
     }
 
     const handleSubmit = async (event) => {
@@ -43,19 +44,34 @@ export default function Page() {
     }
 
     return (
-        <>
-            <form className={styles.container}>
-                <label>Username</label>
-                <input name={'username'} onChange={handleElementChange}/>
-                <label>Email</label>
-                <input name={'email'} onChange={handleElementChange}/>
-                <label>Password</label>
-                <input name={'password1'} onChange={handleElementChange}/>
-                <label>Password confirmation</label>
-                <input name={'password2'} onChange={handleElementChange}/>
-                <button onClick={handleSubmit}>Submit</button>
-            </form>
-            <button onClick={async () => await router.push('/')}>Home</button>
-        </>
+        <div className="flex h-full justify-center items-center">
+            <div className="">
+                <form>
+                    <div className="flex flex-col items-center mb-6">
+                        <span className="text-xl font-semibold">Register</span>
+                    </div>
+                    <div className="flex flex-col items-center mb-4">
+                        <label>Username</label>
+                        <input className="rounded-md" name={'username'} onChange={handleElementChange}/>
+                    </div>
+                    <div className="flex flex-col items-center mb-4">
+                        <label>Email</label>
+                        <input className="rounded-md" name={'email'} onChange={handleElementChange}/>
+                    </div>
+                    <div className="flex flex-col items-center mb-4">
+                        <label>Password</label>
+                        <input className="rounded-md" name={'password1'} onChange={handleElementChange}/>
+                    </div>
+                    <div className="flex flex-col items-center mb-4">
+                        <label>Password confirmation</label>
+                        <input className="rounded-md" name={'password2'} onChange={handleElementChange}/>
+                    </div>
+                    <div className="flex justify-around mt-8">
+                        <button className="bg-gray-800 rounded-md h-8 w-2/5 text-gray-200 hover:bg-gray-600" onClick={handleSubmit}>Submit</button>
+                        <button className="bg-gray-800 rounded-md h-8 w-2/5 text-gray-200 hover:bg-gray-600"><Link href={'/'}>Back</Link></button>
+                    </div>
+                </form>
+            </div>
+        </div>
     )
 }

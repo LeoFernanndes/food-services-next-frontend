@@ -1,8 +1,14 @@
 import {tokenData} from "./types";
+import LocalStorageOperations from "../../localStorage/storageOpetarations";
+import { AuthRefreshTokenType } from "../../localStorage/types";
 
 
 export default class TokenPairAuthentication {
+
+    localStorageOperations: LocalStorageOperations
+
     constructor() {
+        this.localStorageOperations = new LocalStorageOperations()
     }
 
     async authenticateTokenPair(usernameInput: string, passwordInput: string) {
@@ -18,7 +24,7 @@ export default class TokenPairAuthentication {
             const access_token_expiration_time = new Date(Date.now())
             access_token_expiration_time.setTime(access_token_expiration_time.getTime() + tokens.token_duration_minutes * 60 * 1000);
 
-            const tokenData: tokenData = {
+            const tokenData: AuthRefreshTokenType = {
                 access_token: tokens.access_token,
                 refresh_token: tokens.refresh_token,
                 token_duration_minutes: tokens.token_duration_minutes,
@@ -26,6 +32,7 @@ export default class TokenPairAuthentication {
                 token_type: tokens.token_type,
                 access_token_expiration_time: access_token_expiration_time
             }
+            this.localStorageOperations.setIsAuthenticated(true)
             this.saveTokenDataToLocalStorage(tokenData)
             return true
         } else {
@@ -33,13 +40,13 @@ export default class TokenPairAuthentication {
         }
     }
 
-    saveTokenDataToLocalStorage(tokenData: tokenData){
-        localStorage.setItem('token_data', JSON.stringify(tokenData))
+    saveTokenDataToLocalStorage(tokenData: AuthRefreshTokenType){
+        this.localStorageOperations.setAuthRefreshToken(tokenData);
 
     }
 
-    retrieveTokenDataFromLocalStorage(): tokenData {
-        return JSON.parse(localStorage.getItem('token_data'))
+    retrieveTokenDataFromLocalStorage(): AuthRefreshTokenType {
+        return this.localStorageOperations.getAuthRefreshToken();
     }
 
     async refreshTokenPair(){
@@ -57,7 +64,7 @@ export default class TokenPairAuthentication {
             const access_token_expiration_time = new Date(Date.now())
             access_token_expiration_time.setTime(access_token_expiration_time.getTime() + tokens.token_duration_minutes * 60 * 1000);
 
-            const tokenData: tokenData = {
+            const tokenData: AuthRefreshTokenType = {
                 access_token: tokens.access_token,
                 refresh_token: tokens.refresh_token,
                 token_duration_minutes: tokens.token_duration_minutes,
